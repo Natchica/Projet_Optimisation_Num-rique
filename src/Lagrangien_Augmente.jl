@@ -74,34 +74,75 @@ function Lagrangien_Augmente(algo,fonc::Function,contrainte::Function,gradfonc::
 		itermax = options[3]
 		lambda0 = options[4]
 		mu0 = options[5]
-		tho = options[6]
+		τ = options[6]
 	end
 
   n = length(x0)
-  xmin = zeros(n)
+  xmin = x0
   fxmin = 0
   flag = -1
   iter = 0
-  muk = mu0
+  μ₀ = mu0
   muks = [mu0]
-  lambdak = lambda0
+  λₖ = lambda0
   lambdaks = [lambda0]
+
+  β = 0.9
+  η = 0.1258925
+  α = 0.1
+  ε₀ = 1/μ₀
+  ηₖ = η/μ₀^α
+
+  μₖ = μ₀
+  εₖ = ε₀
+
+  Lₐ(x) = fonc(x) + transpose(λₖ)*contrainte(x) + μₖ/2*norm(contrainte(x))^2
+  gradLₐ(x) = gradfonc(x) + transpose(λₖ)*grad_contrainte(x) + μₖ/2*(2*contrainte(x)*grad_contrainte(x))
+  hessLₐ(x) = hessfonc(x) + transpose(λₖ)*hess_contrainte(x) + μₖ/2*(2*(grad_contrainte(x)*transpose(grad_contrainte(x)) + contrainte(x)*hess_contrainte(x)))
+
+  gradL(x) = gradfonc(x) + transpose(λₖ)*grad_contrainte(x)
 
   while flag == -1
     # un minimiseur du problème sans contrainte min(Lagrangien(x,λₖ,μₖ))
     # où Lagrangien(x,λₖ,μₖ) = f(x) + transpose(μₖ)*c(x) + (μₖ*norm(c(x))^2)/2
-    # avec xₖ comme point de départ, en terminant lorsque norm(∇ₓ*Lagrangien(·,λₖ,μₖ) ≤ εₖ
-    xₖ₊₁ = 0
+    # avec xₖ comme point de départ, en terminant lorsque norm(∇ₓ*Lagrangien(·,λₖ,μₖ)) ≤ εₖ
+    if algo == "newton"
+      xmin, _, _, _ = Algorithme_De_Newton(Lₐ,gradLₐ,hessLₐ,xmin,[itermax,εₖ,0,0])
+    else
+      xmin, _, _, _ = Regions_De_Confiance(algo,Lₐ,gradLₐ,hessLₐ,xmin,[10,0.5,2.00,0.25,0.75,2,itermax,εₖ,0,0])
+    end
 
-    if norm(c(xₖ₊₁)) ≤ ηₖ
-      λₖ₊₁ = λₖ + μₖ*c(xₖ₊₁)
+    if norm(contrainte(xmin)) ≤ ηₖ
+      λₖ₊₁ = λₖ + μₖ*contrainte(xmin)
       μₖ₊₁ = μₖ
       εₖ₊₁ = εₖ/μₖ
       ηₖ₊₁ = ηₖ/μₖ^β
     else
-      
+      λₖ₊₁ = λₖ
+      μₖ₊₁ = τ*μₖ
+      εₖ₊₁ = ε₀/μₖ₊₁
+      ηₖ₊₁ = η/μₖ₊₁^α
     end
+
+    if norm(gradL(xmin)) ≤ tol && norm(contrainte(xmin)) ≤ tol
+      flag = 0
+    elseif iter + 1 ≥ itermax
+      flag = 1
+    end 
+
+    push!(muks,μₖ)
+    push!(lambdaks,λₖ)
+
+    λₖ = λₖ₊₁
+    μₖ = μₖ₊₁
+    εₖ = εₖ₊₁
+    ηₖ = ηₖ₊₁
+
+    iter += 1
+
   end
+
+  fxmin = fonc(xmin)
 
   return xmin,fxmin,flag,iter, muks, lambdaks
 end
