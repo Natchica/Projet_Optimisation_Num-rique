@@ -2,7 +2,7 @@ Interprétation
 
 ## Sans contraintes
 
-    Newton -> à vérifier
+    Newton -> FINI
 
     Régions de confiance :
         Pas de Cauchy
