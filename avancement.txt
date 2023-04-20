@@ -7,7 +7,7 @@ Interprétation
     Régions de confiance :
         Pas de Cauchy
             1 -> Ok
-            2 -> à faire
+            2 -> Ok
         GCT :
             1 -> résultats numériques
             2 -> à vérifier
