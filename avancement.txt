@@ -1,17 +1,17 @@
-Interprétation
+Interpretation
 
-## Sans contraintes
+## Without constraints
 
-    Newton -> FINI
+    Newton -> Ok
 
-    Régions de confiance :
-        Pas de Cauchy
+    Trusted regions :
+        Cauchy's step
             1 -> Ok
             2 -> Ok
         GCT :
-            1 -> résultats numériques
-            2 -> à vérifier
+            1 -> Ok
+            2 -> Ok
 
-## Avec contraintes
+## With constraints
 
-    Lagrangier augmenté -> à faire
+    Augmented Lagrangian -> TBD
