@@ -14,4 +14,4 @@ Interpretation
 
 ## With constraints
 
-    Augmented Lagrangian -> TBD
+    Augmented Lagrangian -> Ok
